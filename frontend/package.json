@@ -24,7 +24,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "20.3.33",
-    "@angular/common": "20.3.33",
+    "@angular/common": "20.3.34",
     "@angular/compiler": "20.3.33",
     "@angular/core": "20.3.33",
     "@angular/forms": "20.3.33",
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@angular/build": "20.3.39",
-    "@angular/cli": "20.3.39",
+    "@angular/cli": "22.2.3",
     "@angular/compiler-cli": "20.3.33",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
