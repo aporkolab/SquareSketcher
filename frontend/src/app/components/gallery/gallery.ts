@@ -1,29 +1,39 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { MatListModule } from '@angular/material/list';
 import { ApiService, PixelArt } from '../../services/api';
 import { ArtService } from '../../services/art';
-import { MatListModule } from '@angular/material/list';
-import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-gallery',
-  standalone: true,
-  imports: [CommonModule, MatListModule, MatCardModule],
+  imports: [MatListModule, MatCardModule],
   templateUrl: './gallery.html',
-  styleUrls: ['./gallery.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './gallery.scss',
 })
-export class GalleryComponent implements OnInit {
-  pixelArts: PixelArt[] = [];
+export class GalleryComponent {
+  private readonly apiService = inject(ApiService);
+  private readonly artService = inject(ArtService);
 
-  constructor(private apiService: ApiService, private artService: ArtService) { }
+  readonly pixelArts = signal<PixelArt[]>([]);
+  readonly loadFailed = signal(false);
 
-  ngOnInit(): void {
-    this.loadGallery();
+  constructor() {
+    // Runs once on start and again whenever a save changes the stored gallery.
+    effect(() => {
+      this.artService.galleryVersion();
+      this.loadGallery();
+    });
   }
 
   loadGallery(): void {
-    this.apiService.getAllPixelArt().subscribe(arts => {
-      this.pixelArts = arts;
+    this.apiService.getAllPixelArt().subscribe({
+      next: (arts) => {
+        // The SSR interceptor answers with an empty body.
+        this.pixelArts.set(arts ?? []);
+        this.loadFailed.set(false);
+      },
+      error: () => this.loadFailed.set(true),
     });
   }
 
