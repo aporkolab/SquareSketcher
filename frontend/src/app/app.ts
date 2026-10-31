@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CanvasComponent } from './components/canvas/canvas';
 import { ColorPaletteComponent } from './components/color-palette/color-palette';
 import { GalleryComponent } from './components/gallery/gallery';
@@ -15,10 +15,10 @@ import { RouterOutlet } from '@angular/router';
     GalleryComponent,
     MatToolbarModule,
     MatSnackBarModule,
-    RouterOutlet
+    RouterOutlet,
   ],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './app.scss',
 })
-export class App {
-}
+export class App {}

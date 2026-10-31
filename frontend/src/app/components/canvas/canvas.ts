@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, effect } from '@angular/core';
+import { Component, Input, OnInit, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { ColorService } from '../../services/color';
 import { ApiService, PixelArt } from '../../services/api';
@@ -14,6 +14,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   standalone: true,
   imports: [MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatSnackBarModule],
   templateUrl: './canvas.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./canvas.scss'],
 })
 export class CanvasComponent implements OnInit {

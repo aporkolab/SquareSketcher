@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { ColorService } from '../../services/color';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
   standalone: true,
   imports: [MatGridListModule, MatButtonModule, MatCardModule],
   templateUrl: './color-palette.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./color-palette.scss'],
 })
 export class ColorPaletteComponent {

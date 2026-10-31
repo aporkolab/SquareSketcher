@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { ApiService, PixelArt } from '../../services/api';
 import { ArtService } from '../../services/art';
@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
   standalone: true,
   imports: [MatListModule, MatCardModule],
   templateUrl: './gallery.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./gallery.scss'],
 })
 export class GalleryComponent implements OnInit {
