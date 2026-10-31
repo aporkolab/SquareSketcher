@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ColorService } from '../../services/color';
 import { ApiService, PixelArt } from '../../services/api';
 import { ArtService } from '../../services/art';
@@ -12,14 +12,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-canvas',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatSnackBarModule,
-  ],
+  imports: [MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatSnackBarModule],
   templateUrl: './canvas.html',
   styleUrls: ['./canvas.scss'],
 })
@@ -34,7 +27,7 @@ export class CanvasComponent implements OnInit {
     private colorService: ColorService,
     private apiService: ApiService,
     private artService: ArtService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {
     effect(() => {
       const artToLoad = this.artService.artToLoad();
@@ -75,7 +68,7 @@ export class CanvasComponent implements OnInit {
 
   newArt(): void {
     this.pixels = Array.from({ length: this.height }, () =>
-      Array.from({ length: this.width }, () => '#FFFFFF')
+      Array.from({ length: this.width }, () => '#FFFFFF'),
     );
     this.artName = '';
   }
