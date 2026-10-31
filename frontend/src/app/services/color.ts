@@ -1,12 +1,14 @@
 import { Injectable, signal } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ColorService {
-  selectedColor = signal('#000000');
+  private readonly selectedColorState = signal('#000000');
+
+  readonly selectedColor = this.selectedColorState.asReadonly();
 
   setSelectedColor(color: string): void {
-    this.selectedColor.set(color);
+    this.selectedColorState.set(color);
   }
 }
