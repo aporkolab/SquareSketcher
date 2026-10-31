@@ -5,7 +5,17 @@
   <mat-card-content>
     <mat-grid-list cols="6" rowHeight="1:1">
       @for (color of colors; track color) {
-        <mat-grid-tile [style.background-color]="color" (click)="selectColor(color)">
+        <mat-grid-tile
+          [style.background-color]="color"
+          [class.selected]="color === selectedColor()"
+          [attr.aria-label]="'Select color ' + color"
+          [attr.aria-pressed]="color === selectedColor()"
+          role="button"
+          tabindex="0"
+          (click)="selectColor(color)"
+          (keydown.enter)="selectColor(color)"
+          (keydown.space)="selectColor(color); $event.preventDefault()"
+        >
         </mat-grid-tile>
       }
     </mat-grid-list>

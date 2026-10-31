@@ -1,76 +1,123 @@
-import { Component, Input, OnInit, effect, ChangeDetectionStrategy } from '@angular/core';
-
-import { ColorService } from '../../services/color';
-import { ApiService, PixelArt } from '../../services/api';
-import { ArtService } from '../../services/art';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { FormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ApiService, PixelArt } from '../../services/api';
+import { ArtService } from '../../services/art';
+import { ColorService } from '../../services/color';
+import { NotificationService } from '../../services/notification';
+
+export const BLANK_PIXEL = '#FFFFFF';
 
 @Component({
   selector: 'app-canvas',
-  standalone: true,
-  imports: [MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, MatSnackBarModule],
+  imports: [MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule],
   templateUrl: './canvas.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./canvas.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './canvas.scss',
 })
 export class CanvasComponent implements OnInit {
-  @Input() width = 16;
-  @Input() height = 16;
+  private readonly colorService = inject(ColorService);
+  private readonly apiService = inject(ApiService);
+  private readonly artService = inject(ArtService);
+  private readonly notifications = inject(NotificationService);
 
-  pixels: string[][] = [];
-  artName = '';
+  /** Size of a newly created blank canvas. */
+  readonly width = input(16);
+  readonly height = input(16);
 
-  constructor(
-    private colorService: ColorService,
-    private apiService: ApiService,
-    private artService: ArtService,
-    private snackBar: MatSnackBar,
-  ) {
+  readonly pixels = signal<string[][]>([]);
+  readonly artName = signal('');
+  readonly saving = signal(false);
+
+  /** Id of the art being edited, so saving updates it instead of duplicating it. */
+  private readonly artId = signal<string | undefined>(undefined);
+
+  readonly columns = computed(() => this.pixels()[0]?.length ?? this.width());
+  readonly rows = computed(() => this.pixels().length || this.height());
+
+  constructor() {
     effect(() => {
-      const artToLoad = this.artService.artToLoad();
-      if (artToLoad) {
-        this.pixels = artToLoad.pixels;
-        this.artName = artToLoad.name;
-        this.width = artToLoad.pixels[0].length;
-        this.height = artToLoad.pixels.length;
+      const art = this.artService.artToLoad();
+      if (art) {
+        untracked(() => this.open(art));
       }
     });
   }
 
   ngOnInit(): void {
-    this.newArt();
+    if (this.pixels().length === 0) {
+      this.newArt();
+    }
   }
 
   changePixelColor(row: number, col: number): void {
-    this.pixels[row][col] = this.colorService.selectedColor();
+    const color = this.colorService.selectedColor();
+    this.pixels.update((pixels) =>
+      pixels.map((cells, r) => (r === row ? cells.map((cell, c) => (c === col ? color : cell)) : cells)),
+    );
   }
 
   saveArt(): void {
-    if (!this.artName) {
-      this.snackBar.open('Please enter a name for your art.', 'Close', {
-        duration: 3000,
-      });
+    const name = this.artName().trim();
+    if (!name) {
+      this.notifications.showError('Please enter a name for your art.');
       return;
     }
-    const pixelArt: PixelArt = {
-      name: this.artName,
-      pixels: this.pixels,
-    };
-    this.apiService.savePixelArt(pixelArt).subscribe(() => {
-      this.snackBar.open('Art saved!', 'Close', {
-        duration: 3000,
-      });
+    if (this.saving()) {
+      return;
+    }
+
+    const pixelArt: PixelArt = { name, pixels: this.pixels() };
+    const id = this.artId();
+    if (id) {
+      pixelArt.id = id;
+    }
+
+    this.saving.set(true);
+    this.apiService.savePixelArt(pixelArt).subscribe({
+      next: (saved) => {
+        this.saving.set(false);
+        this.artId.set(saved?.id ?? id);
+        this.notifications.showSuccess('Art saved!');
+        this.artService.notifyGalleryChanged();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.notifications.showError('Could not save your art. Please try again.');
+      },
     });
   }
 
   newArt(): void {
-    this.pixels = Array.from({ length: this.height }, () =>
-      Array.from({ length: this.width }, () => '#FFFFFF'),
+    this.pixels.set(
+      Array.from({ length: this.height() }, () =>
+        Array.from({ length: this.width() }, () => BLANK_PIXEL),
+      ),
     );
-    this.artName = '';
+    this.artName.set('');
+    this.artId.set(undefined);
+  }
+
+  private open(art: PixelArt): void {
+    if (!art.pixels?.length || !art.pixels[0]?.length) {
+      this.notifications.showError(`"${art.name}" has no pixels and cannot be opened.`);
+      return;
+    }
+    // Copy, so drawing does not mutate the object held by the gallery.
+    this.pixels.set(art.pixels.map((row) => [...row]));
+    this.artName.set(art.name);
+    this.artId.set(art.id);
   }
 }

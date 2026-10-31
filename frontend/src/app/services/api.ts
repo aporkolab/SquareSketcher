@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -10,12 +10,11 @@ export interface PixelArt {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = `${environment.apiUrl}/pixel-art`;
-
-  constructor(private http: HttpClient) { }
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/pixel-art`;
 
   savePixelArt(pixelArt: PixelArt): Observable<PixelArt> {
     return this.http.post<PixelArt>(this.apiUrl, pixelArt);
@@ -26,6 +25,6 @@ export class ApiService {
   }
 
   getPixelArtById(id: string): Observable<PixelArt> {
-    return this.http.get<PixelArt>(`${this.apiUrl}/${id}`);
+    return this.http.get<PixelArt>(`${this.apiUrl}/${encodeURIComponent(id)}`);
   }
 }
