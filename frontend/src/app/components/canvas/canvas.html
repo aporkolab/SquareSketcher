@@ -1,27 +1,19 @@
 <div class="canvas-controls">
-  <mat-form-field>
-    <mat-label>Art Name</mat-label>
-    <input matInput [ngModel]="artName()" (ngModelChange)="artName.set($event)" />
-  </mat-form-field>
-  <button mat-raised-button color="primary" [disabled]="saving()" (click)="saveArt()">Save</button>
-  <button mat-raised-button (click)="newArt()">New</button>
+    <mat-form-field>
+        <mat-label>Art Name</mat-label>
+        <input matInput [(ngModel)]="artName">
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="saveArt()">Save</button>
+    <button mat-raised-button (click)="newArt()">New</button>
 </div>
 
-<div
-  class="canvas-grid"
-  [style.grid-template-columns]="'repeat(' + columns() + ', 1fr)'"
-  [style.grid-template-rows]="'repeat(' + rows() + ', 1fr)'"
-  [style.aspect-ratio]="columns() + ' / ' + rows()"
->
-  @for (row of pixels(); track $index; let i = $index) {
-    <div class="canvas-row">
-      @for (pixel of row; track $index; let j = $index) {
-        <div
-          class="canvas-pixel"
-          [style.background-color]="pixel"
-          (click)="changePixelColor(i, j)"
-        ></div>
-      }
-    </div>
-  }
+<div class="canvas-grid" [style.grid-template-columns]="'repeat(' + width + ', 1fr)'">
+  <div *ngFor="let row of pixels; let i = index" class="canvas-row">
+    <div
+      *ngFor="let pixel of row; let j = index"
+      class="canvas-pixel"
+      [style.background-color]="pixel"
+      (click)="changePixelColor(i, j)"
+    ></div>
+  </div>
 </div>

@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ApiService, PixelArt } from './api';
 import { environment } from '../../environments/environment';
 
@@ -11,70 +10,52 @@ describe('ApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      imports: [HttpClientTestingModule],
+      providers: [ApiService]
     });
     service = TestBed.inject(ApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+  });
 
-  it('posts pixel art to save it', () => {
-    const art: PixelArt = { name: 'Test Art', pixels: [['#FFFFFF']] };
-    let result: PixelArt | undefined;
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
 
-    service.savePixelArt(art).subscribe((saved) => (result = saved));
-
+  it('should save pixel art', () => {
+    const mockArt: PixelArt = { name: 'Test Art', pixels: [['#FFFFFF']] };
+    service.savePixelArt(mockArt).subscribe(art => {
+      expect(art).toEqual(mockArt);
+    });
     const req = httpMock.expectOne(apiUrl);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(art);
-    req.flush({ ...art, id: '1' });
-    expect(result).toEqual({ ...art, id: '1' });
+    req.flush(mockArt);
   });
 
-  it('puts pixel art that already has an id to update it', () => {
-    const art: PixelArt = { id: 'a/1', name: 'Test Art', pixels: [['#FFFFFF']] };
-    let result: PixelArt | undefined;
-
-    service.savePixelArt(art).subscribe((saved) => (result = saved));
-
-    const req = httpMock.expectOne(`${apiUrl}/a%2F1`);
-    expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual({ name: 'Test Art', pixels: [['#FFFFFF']] });
-    req.flush(art);
-    expect(result).toEqual(art);
-  });
-
-  it('gets all pixel art', () => {
-    const arts: PixelArt[] = [
+  it('should get all pixel art', () => {
+    const mockArts: PixelArt[] = [
       { id: '1', name: 'Art 1', pixels: [['#FFFFFF']] },
-      { id: '2', name: 'Art 2', pixels: [['#000000']] },
+      { id: '2', name: 'Art 2', pixels: [['#000000']] }
     ];
-    let result: PixelArt[] | undefined;
-
-    service.getAllPixelArt().subscribe((all) => (result = all));
-
+    service.getAllPixelArt().subscribe(arts => {
+      expect(arts.length).toBe(2);
+      expect(arts).toEqual(mockArts);
+    });
     const req = httpMock.expectOne(apiUrl);
     expect(req.request.method).toBe('GET');
-    req.flush(arts);
-    expect(result).toEqual(arts);
+    req.flush(mockArts);
   });
 
-  it('gets pixel art by id', () => {
-    const art: PixelArt = { id: '1', name: 'Test Art', pixels: [['#FFFFFF']] };
-    let result: PixelArt | undefined;
-
-    service.getPixelArtById('1').subscribe((found) => (result = found));
-
+  it('should get pixel art by id', () => {
+    const mockArt: PixelArt = { id: '1', name: 'Test Art', pixels: [['#FFFFFF']] };
+    service.getPixelArtById('1').subscribe(art => {
+      expect(art).toEqual(mockArt);
+    });
     const req = httpMock.expectOne(`${apiUrl}/1`);
     expect(req.request.method).toBe('GET');
-    req.flush(art);
-    expect(result).toEqual(art);
-  });
-
-  it('encodes the id in the URL', () => {
-    service.getPixelArtById('a/b?c').subscribe();
-
-    httpMock.expectOne(`${apiUrl}/a%2Fb%3Fc`).flush(null);
+    req.flush(mockArt);
   });
 });

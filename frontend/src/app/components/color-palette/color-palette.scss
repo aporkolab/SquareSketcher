@@ -1,9 +1,4 @@
 mat-grid-tile {
   cursor: pointer;
   border: 1px solid #ccc;
-
-  &.selected {
-    outline: 3px solid #3f51b5;
-    outline-offset: -3px;
-  }
 }

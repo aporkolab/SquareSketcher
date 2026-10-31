@@ -96,6 +96,40 @@ describe('CanvasComponent', () => {
     expect(api.savePixelArt).toHaveBeenCalledTimes(1);
   });
 
+  it('does not attach an old save response to a new canvas', () => {
+    const pending = new Subject<PixelArt>();
+    api.savePixelArt.mockReturnValue(pending);
+    component.artName.set('First');
+    component.saveArt();
+
+    component.newArt();
+    component.artName.set('Second');
+    pending.next({ id: 'first-id', name: 'First', pixels: [['#000000']] });
+    pending.complete();
+
+    api.savePixelArt.mockReturnValue(of({ id: 'second-id', name: 'Second', pixels: [] }));
+    component.saveArt();
+    expect(api.savePixelArt.mock.calls[1][0].id).toBeUndefined();
+    expect(api.savePixelArt.mock.calls[1][0].name).toBe('Second');
+  });
+
+  it('preserves the selected gallery id when an earlier save completes', async () => {
+    const pending = new Subject<PixelArt>();
+    api.savePixelArt.mockReturnValue(pending);
+    component.artName.set('First');
+    component.saveArt();
+
+    const selected = { id: 'selected-id', name: 'Selected', pixels: [['#FFFFFF']] };
+    artService.loadArt(selected);
+    await fixture.whenStable();
+    pending.next({ id: 'first-id', name: 'First', pixels: [['#000000']] });
+    pending.complete();
+
+    api.savePixelArt.mockReturnValue(of(selected));
+    component.saveArt();
+    expect(api.savePixelArt.mock.calls[1][0].id).toBe('selected-id');
+  });
+
   it('reports a failed save', () => {
     api.savePixelArt.mockReturnValue(throwError(() => new Error('offline')));
     component.artName.set('Art');

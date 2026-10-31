@@ -2,11 +2,7 @@
   display: grid;
   border: 1px solid #000;
   width: 100%;
-}
-
-// Rows only group pixels in the template; the pixels themselves are the grid items.
-.canvas-row {
-  display: contents;
+  aspect-ratio: 1 / 1;
 }
 
 .canvas-pixel {
@@ -15,8 +11,8 @@
 }
 
 .canvas-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
 }

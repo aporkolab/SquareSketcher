@@ -1,25 +1,24 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-const SNACKBAR_DURATION_MS = 3000;
-
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class NotificationService {
-  private readonly snackBar = inject(MatSnackBar);
+
+  constructor(private snackBar: MatSnackBar) { }
 
   showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {
-      duration: SNACKBAR_DURATION_MS,
-      panelClass: ['success-snackbar'],
+      duration: 3000,
+      panelClass: ['success-snackbar']
     });
   }
 
   showError(message: string): void {
     this.snackBar.open(message, 'Close', {
-      duration: SNACKBAR_DURATION_MS,
-      panelClass: ['error-snackbar'],
+      duration: 3000,
+      panelClass: ['error-snackbar']
     });
   }
 }

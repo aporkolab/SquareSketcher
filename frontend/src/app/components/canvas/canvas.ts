@@ -43,6 +43,7 @@ export class CanvasComponent implements OnInit {
 
   /** Id of the art being edited, so saving updates it instead of duplicating it. */
   private readonly artId = signal<string | undefined>(undefined);
+  private canvasRevision = 0;
 
   readonly columns = computed(() => this.pixels()[0]?.length ?? this.width());
   readonly rows = computed(() => this.pixels().length || this.height());
@@ -81,6 +82,7 @@ export class CanvasComponent implements OnInit {
 
     const pixelArt: PixelArt = { name, pixels: this.pixels() };
     const id = this.artId();
+    const revision = this.canvasRevision;
     if (id) {
       pixelArt.id = id;
     }
@@ -89,7 +91,10 @@ export class CanvasComponent implements OnInit {
     this.apiService.savePixelArt(pixelArt).subscribe({
       next: (saved) => {
         this.saving.set(false);
-        this.artId.set(saved?.id ?? id);
+        // A delayed response must not attach the previous id to another canvas.
+        if (revision === this.canvasRevision) {
+          this.artId.set(saved?.id ?? id);
+        }
         this.notifications.showSuccess('Art saved!');
         this.artService.notifyGalleryChanged();
       },
@@ -101,6 +106,7 @@ export class CanvasComponent implements OnInit {
   }
 
   newArt(): void {
+    this.canvasRevision += 1;
     this.pixels.set(
       Array.from({ length: this.height() }, () =>
         Array.from({ length: this.width() }, () => BLANK_PIXEL),
@@ -115,6 +121,7 @@ export class CanvasComponent implements OnInit {
       this.notifications.showError(`"${art.name}" has no pixels and cannot be opened.`);
       return;
     }
+    this.canvasRevision += 1;
     // Copy, so drawing does not mutate the object held by the gallery.
     this.pixels.set(art.pixels.map((row) => [...row]));
     this.artName.set(art.name);
