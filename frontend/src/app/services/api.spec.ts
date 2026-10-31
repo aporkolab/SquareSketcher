@@ -32,6 +32,19 @@ describe('ApiService', () => {
     expect(result).toEqual({ ...art, id: '1' });
   });
 
+  it('puts pixel art that already has an id to update it', () => {
+    const art: PixelArt = { id: 'a/1', name: 'Test Art', pixels: [['#FFFFFF']] };
+    let result: PixelArt | undefined;
+
+    service.savePixelArt(art).subscribe((saved) => (result = saved));
+
+    const req = httpMock.expectOne(`${apiUrl}/a%2F1`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ name: 'Test Art', pixels: [['#FFFFFF']] });
+    req.flush(art);
+    expect(result).toEqual(art);
+  });
+
   it('gets all pixel art', () => {
     const arts: PixelArt[] = [
       { id: '1', name: 'Art 1', pixels: [['#FFFFFF']] },

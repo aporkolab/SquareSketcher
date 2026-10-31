@@ -16,8 +16,11 @@ export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/pixel-art`;
 
-  savePixelArt(pixelArt: PixelArt): Observable<PixelArt> {
-    return this.http.post<PixelArt>(this.apiUrl, pixelArt);
+  /** Creates the art, or updates it in place when it already has an id. */
+  savePixelArt({ id, ...body }: PixelArt): Observable<PixelArt> {
+    return id
+      ? this.http.put<PixelArt>(`${this.apiUrl}/${encodeURIComponent(id)}`, body)
+      : this.http.post<PixelArt>(this.apiUrl, body);
   }
 
   getAllPixelArt(): Observable<PixelArt[]> {
