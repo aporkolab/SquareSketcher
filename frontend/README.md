@@ -1,6 +1,6 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.0.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) and is currently on Angular 22 (Node.js 22.22+ or 24.15+ required).
 
 ## Development server
 
@@ -11,6 +11,8 @@ ng serve
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
+Requests to `/api` are proxied to the backend on `http://localhost:8080` (see `proxy.conf.json`), so start the backend as well to save and load art.
 
 ## Code scaffolding
 
@@ -38,11 +40,13 @@ This will compile your project and store the build artifacts in the `dist/` dire
 
 ## Running unit tests
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+To execute unit tests with the [Vitest](https://vitest.dev) test runner, use the following command:
 
 ```bash
 ng test
 ```
+
+Use `ng test --watch=false` for a single run (this is what CI does).
 
 ## Running end-to-end tests
 
